@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Kienyeji ShopOS"
+description = "A mobile-first operating system for Kenyan indigenous chicken slaughter shops, tracking stock, sales, expenses, cash and credit, and evidence-based management reviews in KES."
+version = "1.0.0"
+id = "artifacts/kienyeji-ops"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23075
+
+[services.development]
+run = "pnpm --filter @workspace/kienyeji-ops run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kienyeji-ops", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/kienyeji-ops/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23075"
+BASE_PATH = "/"

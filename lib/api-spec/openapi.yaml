@@ -10,6 +10,14 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: business
+    description: Business setup and branches
+  - name: operations
+    description: Stock, sales, collections, and expenses
+  - name: reporting
+    description: Live operating metrics and management reviews
+  - name: actions
+    description: Management action tracking
 paths:
   /healthz:
     get:
@@ -24,6 +32,434 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /business:
+    get:
+      operationId: getBusiness
+      tags: [business]
+      summary: Get current business and branches
+      responses:
+        "200":
+          description: Business setup state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSetup"
+    post:
+      operationId: createBusiness
+      tags: [business]
+      summary: Set up the business and first branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessInput"
+      responses:
+        "201":
+          description: Business created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSetup"
+  /branches:
+    post:
+      operationId: createBranch
+      tags: [business]
+      summary: Add a shop branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BranchInput"
+      responses:
+        "201":
+          description: Branch created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Branch"
+  /branches/{id}:
+    patch:
+      operationId: updateBranch
+      tags: [business]
+      summary: Update branch details and daily accountability owners
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BranchUpdate"
+      responses:
+        "200":
+          description: Branch updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Branch"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [business]
+      summary: List business products
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [business]
+      summary: Add a chicken product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [business]
+      summary: Update product details and stock alert threshold
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /stock:
+    get:
+      operationId: getStock
+      tags: [operations]
+      summary: Get on-hand stock by product and branch
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current inventory
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockItem"
+  /stock/receipts:
+    post:
+      operationId: receiveStock
+      tags: [operations]
+      summary: Receive supplier stock into traceable batches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockReceiptInput"
+      responses:
+        "201":
+          description: Stock received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockReceipt"
+  /sales:
+    get:
+      operationId: listSales
+      tags: [operations]
+      summary: List sales for the current business
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+    post:
+      operationId: createSale
+      tags: [operations]
+      summary: Record a sale and consume stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaleInput"
+      responses:
+        "201":
+          description: Sale recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+  /collections:
+    post:
+      operationId: recordCollection
+      tags: [operations]
+      summary: Record a customer payment against an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CollectionInput"
+      responses:
+        "201":
+          description: Payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Collection"
+  /expenses:
+    get:
+      operationId: listExpenses
+      tags: [operations]
+      summary: List business expenses
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [operations]
+      summary: Record an operating expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Expense recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+  /stock/losses:
+    post:
+      operationId: recordStockLoss
+      tags: [operations]
+      summary: Record death, damage, or other stock loss
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockLossInput"
+      responses:
+        "201":
+          description: Loss recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockLoss"
+  /stock/counts:
+    get:
+      operationId: listStockCounts
+      tags: [operations]
+      summary: List stock counts and discrepancies
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stock counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockCount"
+    post:
+      operationId: recordStockCount
+      tags: [operations]
+      summary: Record a physical stock count
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockCountInput"
+      responses:
+        "201":
+          description: Count recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockCount"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [reporting]
+      summary: Calculate financial and stock metrics from saved records
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /business-review:
+    get:
+      operationId: getBusinessReview
+      tags: [reporting]
+      summary: Generate a data-backed Harvard-style business review
+      parameters:
+        - name: branchId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Business review with evidence and recommended actions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessReview"
+  /actions:
+    get:
+      operationId: listActions
+      tags: [actions]
+      summary: List management actions
+      responses:
+        "200":
+          description: Action plan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BusinessAction"
+    post:
+      operationId: createAction
+      tags: [actions]
+      summary: Add an owned management action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessActionInput"
+      responses:
+        "201":
+          description: Action added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessAction"
+  /actions/{id}:
+    patch:
+      operationId: updateAction
+      tags: [actions]
+      summary: Update action progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessActionUpdate"
+      responses:
+        "200":
+          description: Action updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessAction"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +469,399 @@ components:
           type: string
       required:
         - status
+    Business:
+      type: object
+      required: [id, name, currency, openingDate]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        currency: { type: string }
+        openingDate: { type: string, format: date }
+    Branch:
+      type: object
+      required: [id, name, location, active, stockCountOwner, cashReconciliationOwner, creditFollowUpOwner, dayCloseOwner]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        location: { type: string }
+        active: { type: boolean }
+        stockCountOwner: { type: string }
+        cashReconciliationOwner: { type: string }
+        creditFollowUpOwner: { type: string }
+        dayCloseOwner: { type: string }
+    BusinessSetup:
+      type: object
+      required: [business, branches]
+      properties:
+        business:
+          anyOf:
+            - $ref: "#/components/schemas/Business"
+            - type: "null"
+        branches:
+          type: array
+          items:
+            $ref: "#/components/schemas/Branch"
+    BusinessInput:
+      type: object
+      required: [name, openingDate, primaryBranchName, primaryBranchLocation]
+      properties:
+        name: { type: string, minLength: 1 }
+        openingDate: { type: string }
+        primaryBranchName: { type: string, minLength: 1 }
+        primaryBranchLocation: { type: string }
+        primaryBranchStockCountOwner: { type: string }
+        primaryBranchCashReconciliationOwner: { type: string }
+        primaryBranchCreditFollowUpOwner: { type: string }
+        primaryBranchDayCloseOwner: { type: string }
+    BranchInput:
+      type: object
+      required: [name, location]
+      properties:
+        name: { type: string, minLength: 1 }
+        location: { type: string }
+        stockCountOwner: { type: string }
+        cashReconciliationOwner: { type: string }
+        creditFollowUpOwner: { type: string }
+        dayCloseOwner: { type: string }
+    BranchUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        location: { type: string }
+        stockCountOwner: { type: string }
+        cashReconciliationOwner: { type: string }
+        creditFollowUpOwner: { type: string }
+        dayCloseOwner: { type: string }
+        active: { type: boolean }
+    Product:
+      type: object
+      required: [id, name, unit, lowStockThreshold, active]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        unit: { type: string }
+        lowStockThreshold: { type: string }
+        active: { type: boolean }
+    ProductInput:
+      type: object
+      required: [name, unit, lowStockThreshold]
+      properties:
+        name: { type: string, minLength: 1 }
+        unit: { type: string, minLength: 1 }
+        lowStockThreshold: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+    ProductUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        unit: { type: string, minLength: 1 }
+        lowStockThreshold: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+        active: { type: boolean }
+    StockItem:
+      type: object
+      required: [branchId, branchName, productId, productName, unit, quantity, stockValue, oldestBatchDate]
+      properties:
+        branchId: { type: string }
+        branchName: { type: string }
+        productId: { type: string }
+        productName: { type: string }
+        unit: { type: string }
+        quantity: { type: string }
+        stockValue: { type: string }
+        oldestBatchDate: { type: ["string", "null"], format: date }
+    StockReceiptLineInput:
+      type: object
+      required: [productId, quantity, unitCost]
+      properties:
+        productId: { type: string }
+        quantity: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+        unitCost: { type: string, pattern: '^\d+(\.\d{1,2})?$' }
+    StockReceiptInput:
+      type: object
+      required: [branchId, supplierName, receivedAt, lines]
+      properties:
+        branchId: { type: string }
+        supplierName: { type: string, minLength: 1 }
+        reference: { type: string }
+        receivedAt: { type: string, format: date-time }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/StockReceiptLineInput"
+        notes: { type: string }
+    StockReceipt:
+      type: object
+      required: [id, supplierName, receivedAt, lineCount, totalCost]
+      properties:
+        id: { type: string }
+        supplierName: { type: string }
+        receivedAt: { type: string, format: date-time }
+        lineCount: { type: integer }
+        totalCost: { type: string }
+    SaleInput:
+      type: object
+      required: [branchId, productId, quantity, unitPrice, paymentMethod, paidAmount, soldAt]
+      properties:
+        branchId: { type: string }
+        productId: { type: string }
+        quantity: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+        unitPrice: { type: string, pattern: '^\d+(\.\d{1,2})?$' }
+        discount: { type: string, pattern: '^\d+(\.\d{1,2})?$', default: "0" }
+        customerName: { type: string }
+        paymentMethod: { type: string, enum: [cash, mpesa, bank, credit, split] }
+        paidAmount: { type: string, pattern: '^\d+(\.\d{1,2})?$' }
+        soldAt: { type: string }
+        notes: { type: string }
+    Sale:
+      type: object
+      required: [id, receiptNumber, branchId, productName, quantity, unit, unitPrice, total, costOfGoods, paidAmount, amountDue, paymentMethod, soldAt]
+      properties:
+        id: { type: string }
+        receiptNumber: { type: string }
+        branchId: { type: string }
+        productName: { type: string }
+        quantity: { type: string }
+        unit: { type: string }
+        unitPrice: { type: string }
+        total: { type: string }
+        costOfGoods: { type: string }
+        paidAmount: { type: string }
+        amountDue: { type: string }
+        customerName: { type: ["string", "null"] }
+        paymentMethod: { type: string }
+        soldAt: { type: string, format: date-time }
+    CollectionInput:
+      type: object
+      required: [saleId, amount, paymentMethod, paidAt]
+      properties:
+        saleId: { type: string }
+        amount: { type: string, pattern: '^\d+(\.\d{1,2})?$' }
+        paymentMethod: { type: string, enum: [cash, mpesa, bank] }
+        reference: { type: string }
+        paidAt: { type: string }
+    Collection:
+      type: object
+      required: [id, saleId, amount, paymentMethod, paidAt]
+      properties:
+        id: { type: string }
+        saleId: { type: string }
+        amount: { type: string }
+        paymentMethod: { type: string }
+        reference: { type: ["string", "null"] }
+        paidAt: { type: string, format: date-time }
+    ExpenseInput:
+      type: object
+      required: [branchId, category, amount, paymentStatus, paymentMethod, expenseDate]
+      properties:
+        branchId: { type: string }
+        category: { type: string, minLength: 1 }
+        description: { type: string }
+        amount: { type: string, pattern: '^\d+(\.\d{1,2})?$' }
+        paymentStatus: { type: string, enum: [paid, unpaid, partial] }
+        paidAmount: { type: string, pattern: '^\d+(\.\d{1,2})?$', default: "0" }
+        paymentMethod: { type: string, enum: [cash, mpesa, bank, credit] }
+        expenseDate: { type: string }
+    Expense:
+      type: object
+      required: [id, branchId, category, amount, paidAmount, amountDue, expenseDate]
+      properties:
+        id: { type: string }
+        branchId: { type: string }
+        category: { type: string }
+        description: { type: string }
+        amount: { type: string }
+        paidAmount: { type: string }
+        amountDue: { type: string }
+        expenseDate: { type: string, format: date }
+    StockLossInput:
+      type: object
+      required: [branchId, productId, quantity, cause, occurredAt]
+      properties:
+        branchId: { type: string }
+        productId: { type: string }
+        quantity: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+        cause: { type: string, minLength: 1 }
+        notes: { type: string }
+        occurredAt: { type: string }
+    StockLoss:
+      type: object
+      required: [id, branchId, productName, quantity, cause, cost, occurredAt]
+      properties:
+        id: { type: string }
+        branchId: { type: string }
+        productName: { type: string }
+        quantity: { type: string }
+        cause: { type: string }
+        cost: { type: string }
+        occurredAt: { type: string, format: date-time }
+    StockCountInput:
+      type: object
+      required: [branchId, productId, countedQuantity, countedAt]
+      properties:
+        branchId: { type: string }
+        productId: { type: string }
+        countedQuantity: { type: string, pattern: '^\d+(\.\d{1,3})?$' }
+        countedAt: { type: string }
+        notes: { type: string }
+    StockCount:
+      type: object
+      required: [id, branchId, productName, expectedQuantity, countedQuantity, variance, countedAt]
+      properties:
+        id: { type: string }
+        branchId: { type: string }
+        productName: { type: string }
+        expectedQuantity: { type: string }
+        countedQuantity: { type: string }
+        variance: { type: string }
+        countedAt: { type: string, format: date-time }
+        notes: { type: ["string", "null"] }
+    DashboardMetric:
+      type: object
+      required: [revenue, grossProfit, expenses, netProfit, unitsSold, unitsSoldByUnit, stockOnHand, stockOnHandByUnit, stockValue, cashCollected, outstandingCredit, stockLossValue, expensesUnpaid, averageGrossProfitPerUnit]
+      properties:
+        revenue: { type: string }
+        grossProfit: { type: string }
+        expenses: { type: string }
+        netProfit: { type: string }
+        unitsSold: { type: string }
+        unitsSoldByUnit:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnitTotal"
+        stockOnHand: { type: string }
+        stockOnHandByUnit:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnitTotal"
+        stockValue: { type: string }
+        cashCollected: { type: string }
+        outstandingCredit: { type: string }
+        stockLossValue: { type: string }
+        expensesUnpaid: { type: string }
+        averageGrossProfitPerUnit: { type: string }
+    UnitTotal:
+      type: object
+      required: [unit, quantity]
+      properties:
+        unit: { type: string }
+        quantity: { type: string }
+    TrendPoint:
+      type: object
+      required: [date, revenue, grossProfit, expenses]
+      properties:
+        date: { type: string, format: date }
+        revenue: { type: string }
+        grossProfit: { type: string }
+        expenses: { type: string }
+    DashboardSummary:
+      type: object
+      required: [currency, from, to, metrics, trends, lowStock, recentSales]
+      properties:
+        currency: { type: string }
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        metrics:
+          $ref: "#/components/schemas/DashboardMetric"
+        trends:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+        lowStock:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockItem"
+        recentSales:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sale"
+    ReviewFact:
+      type: object
+      required: [label, value, interpretation, evidenceCount, sourceType, recordIds]
+      properties:
+        label: { type: string }
+        value: { type: string }
+        interpretation: { type: string }
+        evidenceCount: { type: integer }
+        sourceType: { type: string }
+        recordIds:
+          type: array
+          items:
+            type: string
+    ReviewAction:
+      type: object
+      required: [title, rationale, priority, dueInDays]
+      properties:
+        title: { type: string }
+        rationale: { type: string }
+        priority: { type: string, enum: [high, medium, low] }
+        dueInDays: { type: integer }
+    BusinessReview:
+      type: object
+      required: [period, branchName, executiveSummary, facts, peopleProcessProduct, unitEconomics, cashAndCredit, keyIssues, likelyCauses, options, recommendationSummary, recommendations, dataLimitations]
+      properties:
+        period: { type: string }
+        branchName: { type: string }
+        executiveSummary: { type: string }
+        facts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewFact"
+        peopleProcessProduct:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewFact"
+        unitEconomics:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewFact"
+        cashAndCredit:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewFact"
+        keyIssues:
+          type: array
+          items:
+            type: string
+        likelyCauses:
+          type: array
+          items:
+            type: string
+        options:
+          type: array
+          items:
+            type: string
+        recommendationSummary: { type: string }
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewAction"
+        dataLimitations:
+          type: array
+          items:
+            type: string
+    BusinessActionInput:
+      type: object
+      required: [title, owner, dueDate, successMetric]
+      properties:
+        title: { type: string, minLength: 1 }
+        owner: { type: string, minLength: 1 }
+        dueDate: { type: string }
+        successMetric: { type: string, minLength: 1 }
+        status: { type: string, enum: [open, in_progress, complete], default: open }
+    BusinessAction:
+      type: object
+      required: [id, title, owner, dueDate, successMetric, status, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        owner: { type: string }
+        dueDate: { type: string, format: date }
+        successMetric: { type: string }
+        status: { type: string, enum: [open, in_progress, complete] }
+        createdAt: { type: string, format: date-time }
+    BusinessActionUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [open, in_progress, complete] }
 
