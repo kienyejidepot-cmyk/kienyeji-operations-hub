@@ -1,14 +1,21 @@
 import { createInsertSchema } from "drizzle-zod";
+import { InferInsertModel } from "drizzle-orm";
 import {
   index,
   numeric,
   pgTable,
   text,
   timestamp,
+  type PgColumn,
   uuid,
 } from "drizzle-orm/pg-core";
 import { businessesTable, branchesTable, productsTable } from "./business";
-import { z } from "zod/v4";
+
+interface StockReceiptTableIndexColumns {
+  businessId: PgColumn;
+  branchId: PgColumn;
+  receivedAt: PgColumn;
+}
 
 export const stockReceiptsTable = pgTable(
   "stock_receipts",
@@ -29,7 +36,7 @@ export const stockReceiptsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; receivedAt: any; branchId: any; }) => [
     index("stock_receipts_business_date_idx").on(
       table.businessId,
       table.receivedAt,
@@ -69,7 +76,7 @@ export const stockBatchesTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; productId: any; branchId: any; receivedAt: any; }) => [
     index("stock_batches_business_product_idx").on(
       table.businessId,
       table.productId,
@@ -112,7 +119,7 @@ export const stockMovementsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; occurredAt: any; branchId: any; productId: any; kind: any; sourceId: any; }) => [
     index("stock_movements_business_date_idx").on(
       table.businessId,
       table.occurredAt,
@@ -149,7 +156,7 @@ export const stockLossesTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; occurredAt: any; branchId: any; }) => [
     index("stock_losses_business_date_idx").on(
       table.businessId,
       table.occurredAt,
@@ -187,7 +194,7 @@ export const stockCountsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; countedAt: any; branchId: any; productId: any; }) => [
     index("stock_counts_business_date_idx").on(
       table.businessId,
       table.countedAt,
@@ -204,4 +211,7 @@ export const insertStockCountSchema = createInsertSchema(stockCountsTable).omit(
   id: true,
   createdAt: true,
 });
-export type InsertStockCount = z.infer<typeof insertStockCountSchema>;
+export type InsertStockCount = Omit<
+  InferInsertModel<typeof stockCountsTable>,
+  "id" | "createdAt"
+>;

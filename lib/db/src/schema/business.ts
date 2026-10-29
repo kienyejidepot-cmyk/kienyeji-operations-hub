@@ -19,12 +19,14 @@ export const businessesTable = pgTable(
     ownerUserId: text("owner_user_id").notNull().unique(),
     name: text("name").notNull(),
     currency: text("currency").notNull().default("KES"),
+    countryCode: text("country_code").notNull().default("KE"),
+    timezone: text("timezone").notNull().default("Africa/Nairobi"),
     openingDate: date("opening_date", { mode: "string" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (table) => [index("businesses_owner_user_idx").on(table.ownerUserId)],
+  (table: { ownerUserId: any; }) => [index("businesses_owner_user_idx").on(table.ownerUserId)],
 );
 
 export const branchesTable = pgTable(
@@ -35,7 +37,12 @@ export const branchesTable = pgTable(
       .notNull()
       .references(() => businessesTable.id),
     name: text("name").notNull(),
+    branchCode: text("branch_code").notNull(),
     location: text("location").notNull().default(""),
+    manager: text("manager").notNull().default(""),
+    businessStatus: text("business_status").notNull().default("open"),
+    currency: text("currency").notNull().default("KES"),
+    timezone: text("timezone").notNull().default("Africa/Nairobi"),
     stockCountOwner: text("stock_count_owner").notNull().default(""),
     cashReconciliationOwner: text("cash_reconciliation_owner").notNull().default(""),
     creditFollowUpOwner: text("credit_follow_up_owner").notNull().default(""),
@@ -45,8 +52,9 @@ export const branchesTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; name: any; branchCode: any; }) => [
     unique("branches_business_name_unique").on(table.businessId, table.name),
+    unique("branches_business_code_unique").on(table.businessId, table.branchCode),
     index("branches_business_idx").on(table.businessId),
   ],
 );
@@ -71,7 +79,7 @@ export const productsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; name: any; }) => [
     unique("products_business_name_unique").on(table.businessId, table.name),
     index("products_business_idx").on(table.businessId),
   ],

@@ -46,7 +46,7 @@ export const salesTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; receiptNumber: any; soldAt: any; branchId: any; customerName: any; amountDue: any; }) => [
     unique("sales_business_receipt_unique").on(
       table.businessId,
       table.receiptNumber,
@@ -80,7 +80,7 @@ export const collectionsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; paidAt: any; saleId: any; }) => [
     index("collections_business_date_idx").on(table.businessId, table.paidAt),
     index("collections_sale_idx").on(table.saleId, table.paidAt),
   ],
@@ -109,7 +109,7 @@ export const expensesTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; expenseDate: any; branchId: any; }) => [
     index("expenses_business_date_idx").on(
       table.businessId,
       table.expenseDate,

@@ -1,6 +1,6 @@
+import { index } from "drizzle-orm";
 import {
   date,
-  index,
   pgTable,
   text,
   timestamp,
@@ -28,7 +28,7 @@ export const businessActionsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; dueDate: any; }) => [
     index("business_actions_business_due_idx").on(
       table.businessId,
       table.dueDate,
@@ -53,7 +53,7 @@ export const auditEventsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [
+  (table: { businessId: any; createdAt: any; recordType: any; recordId: any; }) => [
     index("audit_events_business_created_idx").on(
       table.businessId,
       table.createdAt,

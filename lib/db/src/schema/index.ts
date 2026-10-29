@@ -21,3 +21,4 @@ export * from "./business";
 export * from "./inventory";
 export * from "./finance";
 export * from "./management";
+export * from "./poultry";

@@ -1,0 +1,278 @@
+# Build a Chicken Business Operating System for Kenya
+
+Act as a senior product designer, software architect, and full-stack engineer. Build a working, mobile-first financial and operating system for a Kenyan chicken business with multiple shops.
+
+Use the business discipline of knowing the numbers, assigning clear ownership, and improving **People, Process, and Product**. Give management analysis in a Harvard-style business case review format: facts, key issue, root causes, options, recommendation, risks, owner, deadline, and measures of success. Do not claim the product is endorsed by Harvard or Marcus Lemonis, and do not imitate any person’s exact voice.
+
+## 1. Start by understanding the project
+
+Inspect the existing Replit project before making changes. Keep its current framework and working features if it already has them. If this is a new project, use a maintainable TypeScript web stack, a server-side API, and PostgreSQL with real migrations.
+
+Build the working application, not just a landing page, static dashboard, or clickable mockup. Include working forms, validation, authorization, database persistence, and useful empty states. If a feature depends on external credentials or business setup, build its configuration and a usable manual fallback; label the external integration as pending until it actually works.
+
+Use KES for money and Africa/Nairobi for business dates and times. Default the business opening date to **26 March 2026**, but make it editable during setup. Store exact financial values with decimal database types, never floating-point numbers.
+
+## 2. Business setup and daily use
+
+Create an onboarding flow to configure:
+
+- Business name, currency, opening date, and settings.
+- One or more shop branches, each with a name, location, contact details, and active status.
+- Products and stock units, suppliers, customers, staff, and expense categories.
+- Opening stock, opening cash, bank and M-Pesa balances, capital contributions, and customer credit balances, with their effective dates and evidence.
+- Optional product-to-bird-equivalent conversions, used to make cross-product dashboard comparisons meaningful.
+
+Every transaction must belong to the business and, where applicable, a branch. A user must never be able to view or change data outside their business or authorized branches.
+
+Make the daily experience simple on a phone. Put prominent quick actions on the branch dashboard:
+
+- **Sell chicken**
+- **Receive stock**
+- **Record expense**
+- **Record payment**
+- **Record stock loss**
+- **Take stock count**
+
+Use large controls, short forms, clear error messages, and a visible save confirmation. Remember the selected branch during a working session. Provide a branch switcher with **All shops** and individual shops; obey the user’s permissions when showing options.
+
+## 3. Chicken products, purchases, batches, and stock
+
+Support configurable chicken products and sellable units, such as whole birds, pieces, or kilograms. Each product must have a base unit and optional conversions. Do not silently mix units in totals; show the unit used and make cross-unit comparisons only when a valid conversion has been configured.
+
+Record purchases with:
+
+- Supplier, branch, date, reference or supplier invoice number.
+- Product, quantity, unit, unit price, discounts, taxes if configured, and total.
+- Delivery and other direct costs, recorded separately and optionally allocated to products or batches.
+- Payment status and payment method: cash, bank, M-Pesa, supplier credit, or split payment.
+- Supporting receipt or delivery-note photos.
+- The staff member who entered the purchase and the time it was entered.
+
+On receipt, create traceable stock batches with supplier, purchase, quantity received, purchase cost, branch, and received date. Track stock movements for receipts, sales, transfers, stock counts, returns, damage, death, and corrections. Show on-hand quantity and stock value by shop, product, and batch.
+
+Use FIFO batch consumption by default because chicken is perishable. Let an authorized user select a different batch when needed, recording the reason. Alert staff when stock is low, aged, or approaching a configured freshness/holding threshold. Do not allow negative stock unless an authorized manager records an override and reason.
+
+Support stock transfers between shops with dispatch, receipt, and in-transit status. Require the receiving shop to confirm quantities received and record discrepancies.
+
+Allow an optional stock conversion workflow—for example, whole birds into pieces or kilograms—with recorded input quantity, output quantities, yield, by-products, and loss. Keep the source batch traceable.
+
+## 4. Holding costs, deaths, and stock loss
+
+Track the age of every batch and calculate holding costs per chicken. The business must be able to configure a holding threshold; use **three days** as the initial default. Show the cost incurred before and after that threshold separately.
+
+Allow direct or allocated costs such as:
+
+- Water
+- Electricity
+- Labour
+- Transport
+- Feed or other holding inputs
+- Packaging
+- Knife sharpening
+- Rent, repairs, cleaning, and other configured operating costs
+
+For each cost, support an allocation method such as direct to a batch, per bird, per bird-day, per kilogram, or branch-level unallocated overhead. Make the allocation method visible and editable by an authorized user. Do not assign costs to individual chickens using an undisclosed assumption. Show costs that have not been allocated.
+
+Record deaths and other losses by branch, batch, date, quantity, cause, and staff member. Allow a photo and manager review. Show the cost of the lost stock, including its recorded purchase cost and allocated holding costs, less any salvage or recovery. Post mortality as a visible stock-loss expense so it cannot disappear into unexplained stock differences. Provide a discrepancy investigation workflow for stock counts.
+
+## 5. Sales, customers, credit, and collections
+
+A sale must record:
+
+- Branch, date and time, staff member, product, quantity, unit, price, discount, and total.
+- Customer, if known; support walk-in customers.
+- Payment type: cash, M-Pesa, bank, credit, or a split across methods.
+- Amount paid, amount due, due date, and an optional note.
+- Receipt or supporting photo when configured.
+
+On posting a sale, reduce the correct stock batch, create the customer balance if any amount is unpaid, and produce a receipt. Support printing or sharing a receipt from a phone.
+
+For customer accounts, show invoices, payments, allocations, current balance, due dates, and a statement. Provide configurable credit limits and terms. Block sales above a customer’s credit limit unless an authorized manager approves and records a reason.
+
+Provide an accounts-receivable view with aging buckets, such as current, 1–30 days, 31–60 days, 61–90 days, and over 90 days. Allow partial payments and payments allocated across invoices. Record reminders and follow-up notes.
+
+Support bad-debt write-offs only for authorized roles. Require a reason, evidence where available, and approval. Keep the original sale, payment history, and write-off visible. Never erase the debt history.
+
+## 6. Expenses, purchases, withdrawals, capital, and bank activity
+
+Keep these transaction types distinct:
+
+- **Stock purchases** create inventory and become cost of goods sold as stock is sold.
+- **Operating expenses** record business costs such as water, electricity, rent, labour, transport, and knife sharpening.
+- **Stock losses** record chicken deaths, damage, and unexplained count adjustments.
+- **Owner withdrawals** are drawings, not operating expenses.
+- **Capital contributions** record owner or investor money introduced into the business.
+- **Loans** record borrowed funds and repayments separately from capital.
+- **Bank and cash transfers** move funds between accounts without recording new revenue or expense.
+- **Supplier payments** reduce supplier balances and cash/bank balances appropriately.
+- **Royalties** are recorded under a configurable agreement and shown as accrued, paid, and outstanding.
+
+Every transaction should record its branch where relevant, date, category, amount, payment account, counterparty, reference, staff member, and notes. Support a photo of the receipt or other evidence. Allow split payments and unpaid expense/supplier balances.
+
+Allow setup of multiple cash tills, bank accounts, and M-Pesa accounts. Record opening balances and all deposits, withdrawals, transfers, fees, and reconciliations. Provide a bank and cash reconciliation screen that compares expected and actual balances and flags unmatched items.
+
+Track investors and their individual contributions. Show total paid-in capital across investors. Show loans separately; do not count loans as investor capital.
+
+Configure royalty agreements with effective dates, rate basis, calculation period, and payment history. Support a per-unit amount or percentage basis. Clearly identify estimates and require an authorized person to approve accruals before they become posted financial records.
+
+## 7. M-Pesa and Loop Business
+
+Create a payment integration layer with separate provider adapters and settings. Do not invent endpoints or imply that an integration is connected when it is not.
+
+For M-Pesa:
+
+- Use official Safaricom developer documentation and approved business credentials if the business has access to the required API.
+- Support customer payments and reconciliation against sales, invoices, and customer balances.
+- Store the M-Pesa receipt/reference, amount, phone number where provided, timestamp, account/reference, status, and matched transaction.
+- Prevent duplicate posting by checking the provider receipt/reference and idempotency key.
+- Provide an import-and-review workflow for statements or transaction files when automated access is unavailable.
+- Include an unmatched payment queue and allow authorized staff to match or split a payment across invoices.
+- Keep reversals visible and linked to the original payment; do not silently delete them.
+
+For Loop Business:
+
+- First verify whether official Loop integration documentation and authorized API access are available for the business’s account.
+- If there is no supported API, do not scrape the Loop website, automate app screens, ask staff to store banking passwords, or claim automatic access to account activity.
+- Allow the business to configure its payment instructions and account/reference details, record payments made or received, and import available statements for reconciliation.
+- Make provider credentials and account identifiers configurable; never hard-code a PayBill number or mobile number.
+- For outgoing payments, record the payee, PayBill/Till, account number, amount, reference, approver, and proof. Initiate a real payment only when the business has an authorized, documented provider API and an appropriately approved workflow.
+
+Store all provider secrets only in Replit Secrets or an equivalent secret manager. Never expose them in browser code, logs, screenshots, or database plaintext.
+
+## 8. Photo capture and document intake
+
+On mobile, allow the user to take or upload a photo for sales, purchases, expenses, deliveries, payments, stock losses, and other configured records. Support multiple attachments where useful.
+
+Create a **Document Inbox**. When a photo is uploaded, optionally extract likely information such as document type, date, supplier/customer, receipt number, and amount. Present the extraction as an unposted draft for a human to review. Never create a posted sale, expense, payment, or purchase solely from OCR.
+
+Before posting, check for likely duplicates using document reference, amount, date, and file hash. Show a warning and require review where a duplicate may exist. Let a manager correct OCR results and preserve the original image.
+
+Store photos privately with authenticated access, file metadata, uploader, upload time, and a link to the business record. Validate file type and size. Compress phone images where appropriate and show upload progress. Do not expose private receipt images through public links.
+
+## 9. Roles, sign-in, and security
+
+Provide secure staff sign-in, sign-out, password reset, and administrator-controlled invitations. Do not use shared staff accounts. Enforce permissions on the server/API as well as hiding unauthorized controls in the interface.
+
+Include these starter roles, with editable permissions:
+
+- **Owner/Admin:** business configuration, all branches, users, all transactions, approvals, exports.
+- **Manager:** assigned branches, staff oversight, approvals, stock corrections, credit overrides, reports.
+- **Cashier/Sales:** sales, receipts, customer lookup, and payment recording for assigned branches.
+- **Stock Clerk:** purchase receiving, batch movements, stock counts, and stock-loss drafts for assigned branches.
+- **Accountant:** expenses, reconciliations, financial records, reports, and approved write-offs.
+- **Read Only:** dashboard and records explicitly granted to the user.
+
+Scope every user to one or more branches. Record sensitive actions in an append-only audit history: actor, action, affected record, timestamp, branch, and before/after values where appropriate. Financial records must not be hard-deleted. Correct them with an authorized reversal or adjustment and preserve the original entry.
+
+## 10. Dashboard and management views
+
+Create an **All Shops** dashboard and a single-shop dashboard with a fast branch switcher. Show the selected branch, date range, last refresh, and clear labels explaining whether a figure is all time, a period total, or an as-of balance.
+
+Include filters for:
+
+- All shops or one shop
+- Date range, including a default view from 26 March 2026
+- Product and unit
+- Customer and supplier
+- Staff member
+- Payment method
+- Sale type: paid, partly paid, or credit
+- Stock batch and age
+- Expense category
+
+Allow date comparison with the prior equivalent period. Make chart data respond to the selected filters.
+
+Include these dashboard metrics, with definitions visible in tooltips or a metrics guide:
+
+1. **Total sold** — net units sold after returns, with the unit shown.
+2. **Total revenue** — posted sales after discounts and returns; includes credit sales. Show taxes separately if configured.
+3. **Gross profit** — net revenue minus cost of goods sold for the units sold.
+4. **All expenses** — posted operating expenses for the selected period. Show unpaid expenses separately from cash paid.
+5. **Stock remaining** — on-hand units as of the selected date; show product units and stock value.
+6. **Total capital** — paid-in owner/investor contributions; show loan balances separately.
+7. **Net profit** — gross profit minus operating expenses, bad-debt write-offs, and stock-loss expenses. Show each component separately.
+8. **Cash collected** — actual cash, M-Pesa, and bank collections received during the period; do not count unpaid invoices.
+9. **Outstanding credit** — unpaid customer invoices as of the selected date, with aging.
+10. **Average margin per unit** — gross profit divided by sold units when the unit is comparable. For mixed units, show a configured bird-equivalent measure or state that the figure is not comparable.
+11. **Royalty owed** — approved accrued royalties not yet paid.
+12. **Cash balance** — reconciled balance across selected business accounts, with cash, bank, and M-Pesa split out.
+
+Do not count purchases as both an immediate expense and cost of goods sold. Distinguish profit from cash flow. Clearly show estimates, incomplete reconciliations, and unallocated costs.
+
+Include charts and analytical views for:
+
+- Sales revenue, units sold, gross profit, and net profit over time.
+- Shop comparison by revenue, gross margin, net profit, units sold, stock loss, expenses, and credit exposure.
+- Product profitability by type, size, and unit.
+- Cash collected versus credit sales and customer receipts.
+- Receivables aging and top overdue balances.
+- Stock movement: opening stock, received, sold, transferred, lost, adjusted, and closing stock.
+- Batch age and holding cost, including the cost incurred after three days.
+- Deaths and other stock losses by shop, batch, cause, and trend.
+- Expense breakdown and cost per chicken sold by category and shop.
+- Cash movement and reconciliation status by account.
+
+Keep charts legible on a phone. Provide a table view behind every chart and allow CSV export where the user has permission.
+
+## 11. Automatic business analysis
+
+Create a management **Business Review** that runs for all shops or a selected branch and period. Use this structure:
+
+1. **Executive summary:** what changed and what needs attention.
+2. **Facts:** measured figures with links to the underlying records.
+3. **People, Process, Product review:** staff responsibilities, workflow gaps, and product/channel results supported by data.
+4. **Unit economics:** average purchase cost, holding costs, cost after day three, cost of goods sold, gross margin, losses, and contribution per comparable unit.
+5. **Cash and credit:** collections, cash position, overdue balances, supplier obligations, and reconciliation gaps.
+6. **Key issues and likely causes:** distinguish confirmed facts from hypotheses.
+7. **Options:** practical choices, estimated impact, cost, risk, and evidence needed.
+8. **Recommendation:** the recommended next action and why.
+9. **30/60/90-day action plan:** owner, due date, success metric, and status.
+
+Analysis must be derived from saved business data and configurable thresholds. Each claim should show the number, period, branch, calculation, and records behind it. Label weak evidence and missing data. Do not make up causes, promise outcomes, or make strategic changes automatically. Recommendations are drafts for a manager to review and accept. Let the owner add an action, assign it, set a due date, and track completion.
+
+Include configurable alerts for low stock, aged stock, mortality, rising expense per unit, falling margin, credit-limit breaches, overdue debts, unmatched M-Pesa payments, unreconciled accounts, and unusual stock variances. Allow thresholds and recipients to be configured.
+
+## 12. Database design and migrations
+
+Use versioned, executable PostgreSQL migrations. Include foreign keys, indexes, constraints, audit fields, and safe rollback or documented forward-only handling for data migrations. Add a migration status display for administrators. Do not rely on schema changes made manually outside migrations.
+
+Design normalized tables or equivalent entities for at least:
+
+- `businesses`, `branches`, `users`, `memberships`, `roles`, `permissions`, `branch_access`
+- `business_settings`, `products`, `units`, `unit_conversions`
+- `suppliers`, `customers`, `customer_credit_terms`
+- `purchases`, `purchase_lines`, `stock_batches`, `stock_movements`, `stock_transfers`, `stock_counts`, `mortality_events`, `stock_conversions`
+- `sales`, `sale_lines`, `payments`, `payment_allocations`, `customer_followups`, `bad_debt_writeoffs`
+- `expense_categories`, `expenses`, `expense_allocations`, `supplier_balances`
+- `financial_accounts`, `financial_transactions`, `account_transfers`, `reconciliations`, `statement_imports`
+- `capital_contributions`, `loans`, `royalty_agreements`, `royalty_accruals`
+- `attachments`, `document_inbox`, `integration_settings`
+- `journal_entries`, `journal_lines`, `audit_events`, `business_actions`, `notifications`
+
+Give each business-owned record a `business_id`; give branch-level records a `branch_id`. Use composite constraints or equivalent validation to prevent records from being linked across businesses. Add indexes for business/branch/date, customer balances, product/batch stock, payment references, and reconciliation searches.
+
+Use decimal types for money and quantity precision appropriate to the product unit. Record timestamps consistently and display them in Africa/Nairobi. Add created/updated timestamps and actor IDs. Use immutable posted financial events with reversal/adjustment records instead of destructive edits. Store attachments in private object storage and keep only their metadata and storage key in the database.
+
+Implement the journal/ledger in a way that keeps postings balanced and traceable. Every financial posting must link back to its source transaction. If full double-entry accounting is introduced, keep account configuration understandable and show clear posting explanations; do not hide accounting behavior behind unexplained totals.
+
+## 13. Migrations and rollout order
+
+Implement the schema and screens in practical stages, while keeping the application runnable after each stage:
+
+1. Business setup, branches, sign-in, memberships, permissions, audit events, and settings.
+2. Products, suppliers, customers, purchases, batch stock, movements, and stock counts.
+3. Sales, receipts, customer balances, payment allocations, credit aging, and write-offs.
+4. Expenses, attachments, accounts, cash movements, capital, loans, royalties, and reconciliation.
+5. Dashboard metrics, charts, business review, alerts, exports, and integrations.
+
+Provide a setup path for an existing business: enter opening balances, import customers/products/stock where possible, preview imported data, resolve errors, and approve the opening entries. Never quietly replace live data with demo data.
+
+## 14. Interface and quality requirements
+
+Use a clean, modern, professional interface with a compact navigation menu. On desktop, make the dashboard useful for an owner comparing shops. On mobile, prioritize fast posting and readable balances. Use clear visual hierarchy, sensible number formatting, accessible color contrast, and plain language.
+
+Include loading, empty, error, success, and permission-denied states. Validate quantity, unit, price, date, required branch, customer credit, and payment allocations. Confirm sensitive actions such as write-offs, reversals, stock adjustments, and capital edits.
+
+Use clearly labelled demo data only in a demo environment. Never mix demo records into production business reporting. Provide CSV exports for authorized users and a documented database backup/restore approach.
+
+Before declaring the app complete, walk through the core flows: create a branch and staff user; receive stock; record a death; sell stock for cash and on credit; receive and allocate a partial M-Pesa payment; record an expense with a phone photo; reconcile an account; switch between one shop and all shops; and confirm the dashboard totals update from the saved records. Report any feature that remains dependent on external credentials or business approval.
