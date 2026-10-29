@@ -18,15 +18,37 @@ export const businessesTable = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     ownerUserId: text("owner_user_id").notNull().unique(),
     name: text("name").notNull(),
+    tradingName: text("trading_name"),
     currency: text("currency").notNull().default("KES"),
     countryCode: text("country_code").notNull().default("KE"),
     timezone: text("timezone").notNull().default("Africa/Nairobi"),
     openingDate: date("opening_date", { mode: "string" }).notNull(),
+    taxPin: text("tax_pin"),
+    registrationNumber: text("registration_number"),
+    financialYearStartMonth: numeric("financial_year_start_month", {
+      precision: 2,
+      scale: 0,
+    }).notNull().default("1"),
+    financialYearStartDay: numeric("financial_year_start_day", {
+      precision: 2,
+      scale: 0,
+    }).notNull().default("1"),
+    vatRegistered: boolean("vat_registered").notNull().default(false),
+    accountingMethod: text("accounting_method").notNull().default("accrual"),
+    defaultInventoryMethod: text("default_inventory_method").notNull().default("weighted_average"),
+    jointProductCostingMethod: text("joint_product_costing_method").notNull().default("relative_sales_value"),
+    isSampleData: boolean("is_sample_data").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
-  (table: { ownerUserId: any; }) => [index("businesses_owner_user_idx").on(table.ownerUserId)],
+  (table: { ownerUserId: any; isSampleData: any; }) => [
+    index("businesses_owner_user_idx").on(table.ownerUserId),
+    index("businesses_sample_data_idx").on(table.isSampleData),
+  ],
 );
 
 export const branchesTable = pgTable(

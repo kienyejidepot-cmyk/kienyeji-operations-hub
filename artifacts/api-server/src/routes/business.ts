@@ -63,20 +63,21 @@ router.post("/business", async (req, res): Promise<void> => {
         openingDate: parsed.data.openingDate,
       })
       .returning();
-    const [branch] = await tx
-      .insert(branchesTable)
-      .values({
-        businessId: business.id,
-        name: parsed.data.primaryBranchName.trim(),
-        location: parsed.data.primaryBranchLocation.trim(),
-        stockCountOwner: parsed.data.primaryBranchStockCountOwner?.trim() || "",
-        cashReconciliationOwner:
-          parsed.data.primaryBranchCashReconciliationOwner?.trim() || "",
-        creditFollowUpOwner:
-          parsed.data.primaryBranchCreditFollowUpOwner?.trim() || "",
-        dayCloseOwner: parsed.data.primaryBranchDayCloseOwner?.trim() || "",
-      })
-      .returning();
+  const [branch] = await tx
+    .insert(branchesTable)
+    .values({
+      businessId: business.id,
+      name: parsed.data.primaryBranchName.trim(),
+      location: parsed.data.primaryBranchLocation.trim(),
+      branchCode: `BR-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      stockCountOwner: parsed.data.primaryBranchStockCountOwner?.trim() || "",
+      cashReconciliationOwner:
+        parsed.data.primaryBranchCashReconciliationOwner?.trim() || "",
+      creditFollowUpOwner:
+        parsed.data.primaryBranchCreditFollowUpOwner?.trim() || "",
+      dayCloseOwner: parsed.data.primaryBranchDayCloseOwner?.trim() || "",
+    })
+    .returning();
     return { business, branch };
   });
 
@@ -115,6 +116,7 @@ router.post("/branches", async (req, res): Promise<void> => {
       businessId: business.id,
       name: parsed.data.name.trim(),
       location: parsed.data.location.trim(),
+      branchCode: `BR-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       stockCountOwner: parsed.data.stockCountOwner?.trim() || "",
       cashReconciliationOwner: parsed.data.cashReconciliationOwner?.trim() || "",
       creditFollowUpOwner: parsed.data.creditFollowUpOwner?.trim() || "",

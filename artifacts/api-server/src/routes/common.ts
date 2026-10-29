@@ -1,34 +1,74 @@
-import { getAuth } from "@clerk/express";
-import { and, eq } from "drizzle-orm";
 import type { RequestHandler, Response } from "express";
 import Decimal from "decimal.js";
-import { db, businessesTable, branchesTable, productsTable } from "@workspace/db";
+import { db, businessesTable, branchesTable, productsTable, usersTable } from "@workspace/db";
+import { and, eq } from "drizzle-orm";
+import { validateSession, type AuthContext } from "../lib/auth";
 
-export const requireSignedIn: RequestHandler = (req, res, next) => {
-  const userId = getAuth(req).userId;
-  if (!userId) {
-    res.status(401).json({ error: "Sign in to access business records." });
+export interface AuthenticatedRequest extends Request {
+  auth?: AuthContext;
+}
+
+export const requireSignedIn: RequestHandler = async (req, res, next) => {
+  const context = (req as unknown as AuthenticatedRequest).auth;
+  if (!context) {
+    // Try to validate session from Authorization header
+    const auth = req.headers["authorization"];
+    let token: string | null = null;
+    if (auth && auth.startsWith("Bearer ")) token = auth.slice(7);
+    if (!token) {
+      res.status(401).json({ error: "Sign in to access business records." });
+      return;
+    }
+    const validated = await validateSession(token);
+    if (!validated) {
+      res.status(401).json({ error: "Invalid or expired session." });
+      return;
+    }
+    (req as unknown as AuthenticatedRequest).auth = validated;
+    res.locals.actorUserId = validated.userId;
+    next();
     return;
   }
-  res.locals.actorUserId = userId;
+  res.locals.actorUserId = context.userId;
   next();
 };
 
 export function actorId(res: Response): string {
-  return res.locals.actorUserId as string;
+  return (res.locals.actorUserId as unknown as string);
 }
 
 export async function getOwnedBusiness(userId: string) {
+  const [user] = await db
+    .select({ businessId: usersTable.businessId })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  if (!user) return null;
   const [business] = await db
     .select()
     .from(businessesTable)
-    .where(eq(businessesTable.ownerUserId, userId))
+    .where(eq(businessesTable.id, user.businessId))
+    .limit(1);
+  return business ?? null;
+}
+
+export async function getBusinessByUser(userId: string) {
+  const [user] = await db
+    .select({ businessId: usersTable.businessId })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  if (!user) return null;
+  const [business] = await db
+    .select()
+    .from(businessesTable)
+    .where(eq(businessesTable.id, user.businessId))
     .limit(1);
   return business ?? null;
 }
 
 export async function requireBusiness(res: Response) {
-  const business = await getOwnedBusiness(actorId(res));
+  const business = await getBusinessByUser(actorId(res));
   if (!business) {
     res.status(409).json({ error: "Complete business setup first." });
     return null;

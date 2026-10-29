@@ -6,10 +6,12 @@ import inventoryRouter from "./inventory";
 import financeRouter from "./finance";
 import reportingRouter from "./reporting";
 import actionsRouter from "./actions";
+import foundationRouter from "./foundation";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(foundationRouter);
 router.use(businessRouter);
 router.use(catalogRouter);
 router.use(inventoryRouter);

@@ -23,10 +23,6 @@ router.use(requireSignedIn);
 router.get("/actions", async (_req, res): Promise<void> => {
   const business = await requireBusiness(res);
   if (!business) return;
-  if (!isCalendarDate(parsed.data.dueDate)) {
-    res.status(400).json({ error: "Enter a valid action due date." });
-    return;
-  }
   const rows = await db
     .select()
     .from(businessActionsTable)

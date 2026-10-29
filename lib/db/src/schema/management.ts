@@ -1,4 +1,4 @@
-import { index } from "drizzle-orm";
+import { index } from "drizzle-orm/pg-core";
 import {
   date,
   pgTable,
